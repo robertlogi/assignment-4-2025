@@ -1,19 +1,19 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event"; // 🧑‍🏫 Use this to act like a user
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import Home from "../pages/index";
+import { server } from "./mocks/handlers";
+import { rest } from "msw";
 
-// 🧑‍🏫 Todo add your UI tests here
 describe("Todo List", () => {
   afterEach(() => {
-    cleanup(); // 🧑‍🏫 Clean up the DOM after each test
+    cleanup();
   });
 
-  // 🧑‍🏫 Example test
   it("should show todos when page is loaded", async () => {
     render(<Home />);
 
-    const todo1 = await screen.findByText("Learn Testing"); // 🧑‍🏫 These are defined in __tests__/mocks/handlers.ts
+    const todo1 = await screen.findByText("Learn Testing");
     const todo2 = await screen.findByText("Write Tests");
 
     expect(todo1).toBeDefined();
@@ -23,12 +23,9 @@ describe("Todo List", () => {
     ).toBeDefined();
   });
 
-
   it("should display loading state when fetching data", async () => {
     server.use(
-      rest.get("/api/todos", () =>
-        new Promise(() => {}) // Simulate a hanging request
-      )
+      rest.get("/api/todos", (_, res, ctx) => res(ctx.delay(5000)))
     );
 
     render(<Home />);
@@ -38,7 +35,7 @@ describe("Todo List", () => {
   it("should add a new todo item", async () => {
     render(<Home />);
 
-    const input = screen.getByPlaceholderText("Add a new task...");
+    const input = await screen.findByPlaceholderText("Add a new task...");
     const addButton = screen.getByText("Add");
 
     await userEvent.type(input, "New Task");
@@ -52,12 +49,11 @@ describe("Todo List", () => {
   it("should remove an item from the list", async () => {
     render(<Home />);
 
-    const deleteButton = screen.getAllByText("Delete")[0]; // First delete button
+    const deleteButton = screen.getAllByText("Delete")[0];
     await userEvent.click(deleteButton);
 
     await waitFor(() => {
       expect(screen.queryByText("Learn Testing")).not.toBeInTheDocument();
     });
   });
-  
 });
