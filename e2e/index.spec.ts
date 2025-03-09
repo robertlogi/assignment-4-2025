@@ -13,10 +13,10 @@ async function countTodosForBrowser(page, browserName, testName) {
 }
 
 
-test.beforeEach(async ({ page, browserName }) => {
+test.beforeEach(async ({ page, browserName }, testInfo) => {
   await page.goto("/");
 
-  await page.evaluate(async ({ browserName, testName }) => {
+  await page.evaluate(async (browserName, testName) => {
     const res = await fetch(`/api/todos`);
     const todos = await res.json();
 
@@ -26,8 +26,9 @@ test.beforeEach(async ({ page, browserName }) => {
       }
     }
     await new Promise(res => setTimeout(res, 100));
-  });
+  }, browserName, testInfo.title);
 });
+
 
 
 test("should start with an empty TODO list", async ({ page, browserName }, testInfo) => {
