@@ -2,8 +2,9 @@ import { describe, it, expect, afterEach } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Home from "../pages/index";
-import { server } from "./mocks/handlers";
 import { rest } from "msw";
+import { server } from "../__tests__/mocks/handlers";
+
 
 describe("Todo List", () => {
   afterEach(() => {
@@ -35,7 +36,7 @@ describe("Todo List", () => {
   it("should add a new todo item", async () => {
     render(<Home />);
 
-    const input = await screen.findByPlaceholderText("Add a new task...");
+    const input = screen.getByPlaceholderText("Add a new todo...");
     const addButton = screen.getByText("Add");
 
     await userEvent.type(input, "New Task");
@@ -49,7 +50,7 @@ describe("Todo List", () => {
   it("should remove an item from the list", async () => {
     render(<Home />);
 
-    const deleteButton = screen.getAllByText("Delete")[0];
+    const deleteButton = screen.getAllByRole("button", { name: /delete/i })[0];
     await userEvent.click(deleteButton);
 
     await waitFor(() => {
