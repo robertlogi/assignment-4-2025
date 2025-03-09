@@ -1,20 +1,21 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { rest } from "msw"; // ✅ Fix: Import rest
 import Home from "../pages/index";
-import { rest } from "msw";
-import { server } from "../__tests__/mocks/handlers";
+import { server } from "./setupMSW";
 
 
 describe("Todo List", () => {
   afterEach(() => {
-    cleanup();
+    cleanup(); // 🧑‍🏫 Clean up the DOM after each test
   });
 
+  // 🧑‍🏫 Example test
   it("should show todos when page is loaded", async () => {
     render(<Home />);
 
-    const todo1 = await screen.findByText("Learn Testing");
+    const todo1 = await screen.findByText("Learn Testing"); // 🧑‍🏫 These are defined in __tests__/mocks/handlers.ts
     const todo2 = await screen.findByText("Write Tests");
 
     expect(todo1).toBeDefined();
@@ -30,14 +31,14 @@ describe("Todo List", () => {
     );
 
     render(<Home />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(await screen.findByText(/loading/i)).toBeInTheDocument();
   });
 
   it("should add a new todo item", async () => {
     render(<Home />);
 
     const input = screen.getByPlaceholderText("Add a new todo...");
-    const addButton = screen.getByText("Add");
+    const addButton = screen.getByText(/add/i);
 
     await userEvent.type(input, "New Task");
     await userEvent.click(addButton);
@@ -50,8 +51,10 @@ describe("Todo List", () => {
   it("should remove an item from the list", async () => {
     render(<Home />);
 
-    const deleteButton = screen.getAllByRole("button", { name: /delete/i })[0];
-    await userEvent.click(deleteButton);
+    await waitFor(async () => {
+      const deleteButton = await screen.findByRole("button", { name: /delete/i });
+      await userEvent.click(deleteButton);
+    });
 
     await waitFor(() => {
       expect(screen.queryByText("Learn Testing")).not.toBeInTheDocument();
