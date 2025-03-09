@@ -48,10 +48,22 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Start Next.js in Background
-        run: npm run build && npm run start &
+      - name: Build Next.js App
+        run: npm run build
+
+      - name: Start Next.js Server
+        run: npm run start &
         env:
           NODE_ENV: test
 
+      - name: Wait for Next.js to be Ready
+        run: |
+          for i in {1..30}; do
+            curl -sSf http://localhost:3000 && break
+            echo "Waiting for Next.js to start..."
+            sleep 2
+          done
+
       - name: Run Playwright E2E Tests
         run: npm run test:e2e
+
