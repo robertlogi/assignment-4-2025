@@ -13,8 +13,22 @@ export const resetTodos = () => {
 };
 
 export const handlers = [
+  // GET /api/todos - Return the list of todos
   http.get("/api/todos", () => {
     return HttpResponse.json(mockTodos);
   }),
-  // 🧑‍🏫 Add other handlers such as POST and PUT here
+
+  // POST /api/todos - Add a new todo
+  http.post("/api/todos", async ({ request }) => {
+    const newTodo: Todo = await request.json();
+    mockTodos.push(newTodo);
+    return HttpResponse.json(newTodo, { status: 201 });
+  }),
+
+  // DELETE /api/todos/:id - Remove a todo
+  http.delete("/api/todos/:id", ({ params }) => {
+    const { id } = params;
+    mockTodos = mockTodos.filter(todo => todo.id !== id);
+    return HttpResponse.json({ success: true }, { status: 200 });
+  })
 ];
