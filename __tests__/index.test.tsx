@@ -27,22 +27,27 @@ describe("Todo List", () => {
 
   it("should display loading state when fetching data", async () => {
     server.use(
-      rest.get("/api/todos", (_, res, ctx) => res(ctx.delay(5000)))
+      rest.get("/api/todos", async (_, res, ctx) => {
+        return res(ctx.delay(5000), ctx.json([])); // Ensure response is returned after delay
+      })
     );
 
     render(<Home />);
-    expect(await screen.findByText(/loading/i)).toBeInTheDocument();
+    
+    // Ensure there's a loading state in the UI (modify based on your UI implementation)
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
   it("should add a new todo item", async () => {
     render(<Home />);
 
     const input = screen.getByPlaceholderText("Add a new todo...");
-    const addButton = screen.getByText(/add/i);
+    const addButton = screen.getByRole("button", { name: /add/i });
 
     await userEvent.type(input, "New Task");
     await userEvent.click(addButton);
 
+    // Ensure the new task appears in the list
     await waitFor(() => {
       expect(screen.getByText("New Task")).toBeInTheDocument();
     });
@@ -51,11 +56,17 @@ describe("Todo List", () => {
   it("should remove an item from the list", async () => {
     render(<Home />);
 
-    await waitFor(async () => {
-      const deleteButton = await screen.findByRole("button", { name: /delete/i });
-      await userEvent.click(deleteButton);
+    // Ensure "Learn Testing" is in the document before deletion
+    await waitFor(() => {
+      expect(screen.getByText("Learn Testing")).toBeInTheDocument();
     });
 
+    const deleteButtons = await screen.findAllByRole("button", { name: /delete/i });
+
+    // Click the first delete button
+    await userEvent.click(deleteButtons[0]);
+
+    // Ensure "Learn Testing" is removed from the document
     await waitFor(() => {
       expect(screen.queryByText("Learn Testing")).not.toBeInTheDocument();
     });
