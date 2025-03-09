@@ -13,7 +13,7 @@ async function countTodosForBrowser(page, browserName, testName) {
 }
 
 
-test.beforeEach(async ({ page, browserName }, testInfo) => {
+test.beforeEach(async ({ page, browserName }) => {
   await page.goto("/");
 
   await page.evaluate(async ({ browserName, testName }) => {
@@ -25,14 +25,8 @@ test.beforeEach(async ({ page, browserName }, testInfo) => {
         await fetch(`/api/todos?id=${todo.id}`, { method: "DELETE" });
       }
     }
-
-    let remainingTodos;
-    do {
-      await new Promise(res => setTimeout(res, 100));
-      const checkRes = await fetch(`/api/todos`);
-      remainingTodos = await checkRes.json();
-    } while (remainingTodos.some(todo => todo.text.includes(browserName) && todo.text.includes(testName)));
-  }, { browserName, testName: testInfo.title });
+    await new Promise(res => setTimeout(res, 100));
+  });
 });
 
 
