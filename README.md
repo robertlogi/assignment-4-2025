@@ -59,3 +59,4 @@ Good luck and Have fun :)
 
 E2E_TEST=true npm run test:e2e
 npm run test
+
