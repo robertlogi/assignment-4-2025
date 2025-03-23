@@ -1,8 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-function generateRandomTodo(browser: string, testLabel: string) {
-  return `TODO for ${browser} ${testLabel} ${Math.random().toString(36).substring(2, 10)}`;
+
+function generateUniqueTodo(browserName: string, testName: string) {
+  return `TODO for ${browserName} ${testName} ${Math.random().toString(36).substring(2, 10)}`;
 }
+
 
 async function countTodos(page, _browser, testLabel) {
   await page.waitForTimeout(500);
@@ -10,6 +12,7 @@ async function countTodos(page, _browser, testLabel) {
     .filter({ hasText: testLabel })
     .count();
 }
+
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -26,6 +29,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+
 test.afterEach(async ({ page }) => {
   await page.evaluate(async () => {
     const response = await fetch(`/api/todos`);
@@ -39,12 +43,14 @@ test.afterEach(async ({ page }) => {
   });
 });
 
+
 test("should initialize with an empty TODO list", async ({ page, browserName }, testInfo) => {
   await expect(await countTodos(page, browserName, testInfo.title)).toBe(0);
 });
 
+
 test("should allow adding a new TODO entry", async ({ page, browserName }, testInfo) => {
-  const uniqueTodo = generateRandomTodo(browserName, testInfo.title);
+  const uniqueTodo = generateUniqueTodo(browserName, testInfo.title);
   await page.fill("input[type='text']", uniqueTodo);
   await page.locator("button:text('Add ✨')").click({ force: true });
 
@@ -52,9 +58,10 @@ test("should allow adding a new TODO entry", async ({ page, browserName }, testI
   await expect(await countTodos(page, browserName, testInfo.title)).toBe(1);
 });
 
+
 test("should support adding multiple TODO items", async ({ page, browserName }, testInfo) => {
-  const firstTask = generateRandomTodo(browserName, testInfo.title);
-  const secondTask = generateRandomTodo(browserName, testInfo.title);
+  const firstTask = generateUniqueTodo(browserName, testInfo.title);
+  const secondTask = generateUniqueTodo(browserName, testInfo.title);
   await page.fill("input[type='text']", firstTask);
   await page.locator("button:text('Add ✨')").click({ force: true });
   await page.fill("input[type='text']", secondTask);
@@ -65,19 +72,18 @@ test("should support adding multiple TODO items", async ({ page, browserName }, 
   await expect(await countTodos(page, browserName, testInfo.title)).toBe(2);
 });
 
+
 test("should enable removing a TODO item", async ({ page, browserName }, testInfo) => {
-  const taskOne = generateRandomTodo(browserName, testInfo.title);
-  const taskTwo = generateRandomTodo(browserName, testInfo.title);
+  const taskOne = generateUniqueTodo(browserName, testInfo.title);
+  const taskTwo = generateUniqueTodo(browserName, testInfo.title);
   await page.fill("input[type='text']", taskOne);
   await page.locator("button:text('Add ✨')").click({ force: true });
   await page.fill("input[type='text']", taskTwo);
   await page.locator("button:text('Add ✨')").click({ force: true });
 
-  // Verify both tasks are added
   await expect(page.locator("span[data-testid='todo-text']").filter({ hasText: taskOne })).toHaveCount(1);
   await expect(page.locator("span[data-testid='todo-text']").filter({ hasText: taskTwo })).toHaveCount(1);
 
-  // Select the correct todo item
   const todoItem = await page.locator("ul > li").filter({
     has: page.locator("span[data-testid='todo-text']", { hasText: taskOne })
   }).nth(0);
