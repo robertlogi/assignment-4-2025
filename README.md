@@ -63,9 +63,9 @@ npm run test
 
 ## Preview Example
 
-
+https://assignment-4-2025-robertlogi-roberts-projects-80666b76.vercel.app/
 
 ## Deployment link
 
-assignment-4-2025-bg9phnfg1-roberts-projects-80666b76.vercel.app
+https://assignment-4-2025-bg9phnfg1-roberts-projects-80666b76.vercel.app
 
