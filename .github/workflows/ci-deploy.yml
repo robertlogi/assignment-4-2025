@@ -83,11 +83,16 @@ jobs:
       - run: npm run build
       - run: |
           BRANCH_NAME=${{ github.head_ref || github.ref_name }}
-          npx vercel --token ${{ secrets.VERCEL_TOKEN }} \
-            --confirm \
+          DEPLOY_URL=$(npx vercel deploy --prebuilt \
+            --token ${{ secrets.VERCEL_TOKEN }} \
             --scope ${{ secrets.VERCEL_ORG_ID }} \
-            --prebuilt \
-            --alias "$BRANCH_NAME--assignment-4-2025.vercel.app"
+            --project ${{ secrets.VERCEL_PROJECT_ID }} \
+            --confirm)
+
+          echo "deployment-url=${DEPLOY_URL}" >> "$GITHUB_OUTPUT"
+
+          npx vercel alias set $DEPLOY_URL "$BRANCH_NAME--assignment-4-2025.vercel.app" \
+            --token ${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
